@@ -15,6 +15,7 @@ dependencyResolutionManagement {
 }
 
 include(":media")
+include(":media-camera")
 include(":media-compose")
 include(":media-test")
 include(":sample:android-app")

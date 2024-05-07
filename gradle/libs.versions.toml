@@ -1,6 +1,7 @@
 [versions]
 kotlinVersion = "1.9.10"
 androidAppCompatVersion = "1.6.1"
+coreKtx = "1.13.1"
 materialDesignVersion = "1.8.0"
 androidLifecycleVersion = "2.3.1"
 androidExifInterface = "1.3.6"
@@ -10,13 +11,22 @@ mokoPermissionsVersion = "0.18.0"
 mokoTestVersion = "0.6.1"
 mokoMediaVersion = "0.11.0"
 composeJetBrainsVersion = "1.5.1"
+cameraxVersion = "1.2.2"
 
 [libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 appCompat = { module = "androidx.appcompat:appcompat", version.ref = "androidAppCompatVersion" }
 material = { module = "com.google.android.material:material", version.ref = "materialDesignVersion" }
 lifecycle = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "androidLifecycleVersion" }
 exifInterface = { module = "androidx.exifinterface:exifinterface", version.ref = "androidExifInterface" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutinesVersion" }
+
+camerax-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraxVersion" }
+camerax-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraxVersion" }
+camerax-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraxVersion" }
+camerax-camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "cameraxVersion" }
+camerax-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraxVersion" }
+camerax-camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "cameraxVersion" }
 
 mokoPermissions = { module = "dev.icerock.moko:permissions", version.ref = "mokoPermissionsVersion" }
 mokoPermissionsCompose = { module = "dev.icerock.moko:permissions-compose", version.ref = "mokoPermissionsVersion" }

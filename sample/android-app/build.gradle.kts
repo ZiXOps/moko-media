@@ -17,5 +17,7 @@ android {
 dependencies {
     implementation(libs.appCompat)
 
+    implementation(libs.camerax.camera.view)
+
     implementation(projects.sample.mppLibrary)
 }
