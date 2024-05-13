@@ -15,6 +15,7 @@ dependencies {
     commonMainApi(libs.mokoMvvmCore)
     commonMainApi(libs.mokoMvvmLiveData)
     commonMainApi(projects.media)
+    commonMainApi(projects.mediaCamera)
 
     commonTestImplementation(libs.mokoTest)
     commonTestImplementation(libs.mokoMvvmTest)

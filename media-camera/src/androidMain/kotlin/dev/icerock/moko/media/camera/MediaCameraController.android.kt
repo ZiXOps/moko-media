@@ -4,15 +4,28 @@
 
 package dev.icerock.moko.media.camera
 
+import androidx.activity.ComponentActivity
 import androidx.camera.view.PreviewView
-import androidx.lifecycle.LifecycleOwner
 import dev.icerock.moko.media.Media
+import dev.icerock.moko.permissions.PermissionsController
 
 actual interface MediaCameraController {
 
-    fun bind(previewView: PreviewView, lifecycleOwner: LifecycleOwner)
+    actual val permissionsController: PermissionsController
 
-    actual suspend fun takePhoto(): Media
+    fun bind(previewView: PreviewView, activity: ComponentActivity)
+
+    actual suspend fun takePhoto()
 
     actual suspend fun captureVideo()
+
+    companion object {
+        operator fun invoke(
+            permissionsController: PermissionsController,
+        ): MediaCameraController {
+            return MediaCameraControllerImpl(
+                permissionsController = permissionsController,
+            )
+        }
+    }
 }

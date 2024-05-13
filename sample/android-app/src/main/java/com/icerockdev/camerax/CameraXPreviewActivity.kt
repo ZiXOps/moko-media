@@ -3,8 +3,8 @@ package com.icerockdev.camerax
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.icerockdev.databinding.ActivityCameraxPreviewBinding
-import com.icerockdev.library.ImageSelectionViewModel
-import dev.icerock.moko.media.picker.MediaPickerController
+import com.icerockdev.library.CameraPreviewViewModel
+import dev.icerock.moko.media.camera.MediaCameraController
 import dev.icerock.moko.mvvm.getViewModel
 import dev.icerock.moko.permissions.PermissionsController
 
@@ -20,13 +20,13 @@ class CameraXPreviewActivity : AppCompatActivity() {
             val permissionsController = PermissionsController(
                 applicationContext = applicationContext
             )
-            val mediaPickerController = MediaPickerController(permissionsController)
-            ImageSelectionViewModel(mediaPickerController)
+            val mediaCameraController = MediaCameraController(permissionsController)
+            CameraPreviewViewModel(mediaCameraController)
         }
 
-        viewModel.mediaPickerController.bind(this)
+        viewModel.mediaCameraController.bind(binding.viewFinder, this)
 
-        binding.imageCaptureButton.setOnClickListener { viewModel.onGalleryPressed() }
-        binding.videoCaptureButton.setOnClickListener { viewModel.onCameraPressed() }
+        binding.imageCaptureButton.setOnClickListener { viewModel.onCameraCapturePressed() }
+        binding.videoCaptureButton.setOnClickListener { viewModel.onVideoCapturePressed() }
     }
 }

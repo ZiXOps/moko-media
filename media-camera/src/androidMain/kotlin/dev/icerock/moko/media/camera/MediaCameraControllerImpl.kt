@@ -4,6 +4,7 @@
 
 package dev.icerock.moko.media.camera
 
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
 import android.os.Build
@@ -22,23 +23,45 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
+import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import dev.icerock.moko.media.Media
+import dev.icerock.moko.permissions.PermissionsController
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.concurrent.ExecutorService
 
-internal class MediaCameraControllerImpl() : MediaCameraController {
+internal class MediaCameraControllerImpl(
+    override val permissionsController: PermissionsController,
+) : MediaCameraController {
 
-    private lateinit var cameraExecutor: ExecutorService
+    private val activityHolder = MutableStateFlow<Activity?>(null)
 
     private var imageCapture: ImageCapture? = null
     private var videoCapture: VideoCapture<Recorder>? = null
     private var recording: Recording? = null
 
-    override fun bind(previewView: PreviewView, lifecycleOwner: LifecycleOwner) {
-        startCamera(previewView, lifecycleOwner)
+    override fun bind(previewView: PreviewView, activity: ComponentActivity) {
+        this.activityHolder.value = activity
+        permissionsController.bind(activity)
+
+        startCamera(previewView, activity)
+
+        val observer = object : LifecycleEventObserver {
+
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    this@MediaCameraControllerImpl.activityHolder.value = null
+                    source.lifecycle.removeObserver(this)
+                }
+            }
+        }
+        activity.lifecycle.addObserver(observer)
     }
 
     private fun startCamera(previewView: PreviewView, lifecycleOwner: LifecycleOwner) {
@@ -73,8 +96,9 @@ internal class MediaCameraControllerImpl() : MediaCameraController {
         }, ContextCompat.getMainExecutor(context))
     }
 
-    override suspend fun takePhoto(): Media {
-        TODO("Not yet implemented")
+    override suspend fun takePhoto() {
+        val context = awaitActivity()
+        takePhoto(context)
     }
 
     private suspend fun takePhoto(context: Context) {
@@ -106,7 +130,10 @@ internal class MediaCameraControllerImpl() : MediaCameraController {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
 
-                override fun onImageSaved(output: ImageCapture.OutputFileResults){
+                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+//                    val media = output.savedUri?.let {
+//                        MediaFactory.create(context, it)
+//                    }
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Log.d(TAG, msg)
                 }
@@ -115,10 +142,11 @@ internal class MediaCameraControllerImpl() : MediaCameraController {
     }
 
     override suspend fun captureVideo() {
-        TODO("Not yet implemented")
+        val context = awaitActivity()
+        captureVideo(context)
     }
 
-    private fun captureVideo(context: Context) {
+    private suspend fun captureVideo(context: Context) {
         val videoCapture = this.videoCapture ?: return
         val contentResolver = context.contentResolver
 
@@ -153,6 +181,7 @@ internal class MediaCameraControllerImpl() : MediaCameraController {
                     is VideoRecordEvent.Finalize -> {
                         if (!recordEvent.hasError()) {
                             val outputUri = recordEvent.outputResults.outputUri
+                            //val media = MediaFactory.create(context, outputUri)
                         } else {
                             recording?.close()
                             recording = null
@@ -162,8 +191,23 @@ internal class MediaCameraControllerImpl() : MediaCameraController {
             }
     }
 
+    private suspend fun awaitActivity(): Activity {
+        val activity = activityHolder.value
+        if (activity != null) return activity
+
+        return withTimeoutOrNull(AWAIT_ACTIVITY_TIMEOUT_DURATION_MS) {
+            activityHolder.filterNotNull().first()
+        } ?: error(
+            "activity is null, `bind` function was never called," +
+                    " consider calling mediaCameraController.bind(previewView, activity)" +
+                    " check the documentation for more info: " +
+                    "https://github.com/icerockdev/moko-media/blob/master/README.md"
+        )
+    }
+
     companion object {
         private const val TAG = "MediaCameraController"
+        private const val AWAIT_ACTIVITY_TIMEOUT_DURATION_MS = 2000L
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
     }
 }

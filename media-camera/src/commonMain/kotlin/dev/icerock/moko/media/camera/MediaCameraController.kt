@@ -5,10 +5,13 @@
 package dev.icerock.moko.media.camera
 
 import dev.icerock.moko.media.Media
+import dev.icerock.moko.permissions.PermissionsController
 
 expect interface MediaCameraController {
 
-    suspend fun takePhoto() : Media
+    val permissionsController: PermissionsController
 
-    suspend fun takeVideo() : Media
+    suspend fun takePhoto()
+
+    suspend fun captureVideo()
 }

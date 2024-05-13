@@ -18,6 +18,7 @@ android {
 }
 
 dependencies {
+    androidMainImplementation(libs.appCompat)
     androidMainImplementation(libs.androidx.core.ktx)
 
     androidMainImplementation(libs.camerax.camera.core)
